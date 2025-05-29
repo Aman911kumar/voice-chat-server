@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  voice-chat-server:
+    build: .
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./recordings:/app/recordings
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - voice-chat-server
+    restart: unless-stopped
